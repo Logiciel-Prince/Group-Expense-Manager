@@ -6,54 +6,60 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loading } from '../components/Loading';
 
 // Screens
-import { LoginScreen } from '../screens/LoginScreen';
-import { HomeScreen } from '../screens/HomeScreen';
+import { CreateGroupScreen } from "../screens/CreateGroupScreen";
+import { LoginScreen } from "../screens/LoginScreen";
+import { HomeScreen } from "../screens/HomeScreen";
 // Import other screens here as they are created
 
 const Stack = createNativeStackNavigator();
 
 export const AppNavigator: React.FC = () => {
-  const { colors } = useTheme();
-  const { isAuthenticated, isLoading } = useAuth();
+    const { colors } = useTheme();
+    const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <Loading />;
-  }
+    if (isLoading) {
+        return <Loading />;
+    }
 
-  return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: colors.background,
-          },
-          headerTintColor: colors.text,
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-          headerShadowVisible: false,
-          contentStyle: {
-            backgroundColor: colors.background,
-          },
-        }}
-      >
-        {!isAuthenticated ? (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-        ) : (
-          <>
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{ headerShown: false }}
-            />
-            {/* Add other authenticated screens here */}
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+    return (
+        <NavigationContainer>
+            <Stack.Navigator
+                screenOptions={{
+                    headerStyle: {
+                        backgroundColor: colors.background,
+                    },
+                    headerTintColor: colors.text,
+                    headerTitleStyle: {
+                        fontWeight: "600",
+                    },
+                    headerShadowVisible: false,
+                    contentStyle: {
+                        backgroundColor: colors.background,
+                    },
+                }}
+            >
+                {!isAuthenticated ? (
+                    <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                        options={{ headerShown: false }}
+                    />
+                ) : (
+                    <>
+                        <Stack.Screen
+                            name="Home"
+                            component={HomeScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="CreateGroup"
+                            component={CreateGroupScreen}
+                            options={{ title: "Create Group" }}
+                        />
+                        {/* Add other authenticated screens here */}
+                    </>
+                )}
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
 };
