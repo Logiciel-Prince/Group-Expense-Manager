@@ -7,6 +7,7 @@ import { Loading } from '../components/Loading';
 
 // Screens
 import { CreateGroupScreen } from "../screens/CreateGroupScreen";
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { LoginScreen } from "../screens/LoginScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 // Import other screens here as they are created
@@ -55,6 +56,11 @@ export const AppNavigator: React.FC = () => {
                             name="CreateGroup"
                             component={CreateGroupScreen}
                             options={{ title: "Create Group" }}
+                        />
+                        <Stack.Screen
+                            name="Profile"
+                            component={ProfileScreen}
+                            options={{ title: 'Profile' }}
                         />
                         {/* Add other authenticated screens here */}
                     </>
