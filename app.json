@@ -1,0 +1,32 @@
+{
+  "expo": {
+      "name": "Group Expense Manager",
+      "slug": "group-expense-manager",
+      "version": "1.0.0",
+      "orientation": "portrait",
+      "icon": "./assets/icon.png",
+      "userInterfaceStyle": "automatic",
+      "splash": {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#6366F1"
+      },
+      "assetBundlePatterns": ["**/*"],
+      "ios": {
+          "supportsTablet": true,
+          "bundleIdentifier": "com.yourcompany.groupexpensemanager"
+      },
+      "android": {
+          "adaptiveIcon": {
+              "foregroundImage": "./assets/adaptive-icon.png",
+              "backgroundColor": "#6366F1"
+          },
+          "package": "com.yourcompany.groupexpensemanager"
+      },
+      "web": {
+          "favicon": "./assets/favicon.png"
+      },
+      "plugins": ["expo-router"],
+      "scheme": "groupexpensemanager"
+  }
+}
