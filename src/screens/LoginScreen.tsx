@@ -1,122 +1,177 @@
 import React, { useState } from 'react';
+import { View, Text, StyleSheet, Alert, Platform } from "react-native";
+import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
+import { Button } from "../components/Button";
+import { Loading } from "../components/Loading";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Alert,
-  Platform,
-} from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/Button';
-import { Loading } from '../components/Loading';
-import { SPACING, FONT_SIZES, FONT_WEIGHTS, RADIUS, GOOGLE_CLIENT_ID } from '../constants';
+    SPACING,
+    FONT_SIZES,
+    FONT_WEIGHTS,
+    RADIUS,
+    GOOGLE_CLIENT_ID,
+    REDIRECT_URI,
+} from "../constants";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export const LoginScreen: React.FC = () => {
-  const { colors } = useTheme();
-  const { login } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+    const { colors } = useTheme();
+    const { login } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: GOOGLE_CLIENT_ID,
-    iosClientId: GOOGLE_CLIENT_ID,
-    androidClientId: GOOGLE_CLIENT_ID,
-  });
+    const redirectUri = REDIRECT_URI;
 
-  React.useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      handleGoogleLogin(id_token);
+    // Log the expected URI for debugging
+    console.log("Expected Redirect URI:", redirectUri);
+
+    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+        clientId: GOOGLE_CLIENT_ID.web,
+        // We strictly use the Web Client ID for all platforms here to force the
+        // Redirect URI flow (https://auth.expo.io/...).
+        // Native Client IDs (android/ios) do NOT satisfy the Redirect URI requirement.
+        redirectUri: redirectUri,
+    });
+
+    React.useEffect(() => {
+        if (request) {
+            console.log("Request Redirect URI:", request.redirectUri);
+        }
+    }, [request]);
+
+    React.useEffect(() => {
+        if (response?.type === "success") {
+            const { id_token } = response.params;
+            handleGoogleLogin(id_token);
+        } else if (response?.type === "error") {
+            Alert.alert(
+                "Authentication Error",
+                "Please check your Google Cloud Console configuration."
+            );
+            console.error("Auth Error:", response.error);
+        }
+    }, [response]);
+
+    const handleGoogleLogin = async (idToken: string) => {
+        try {
+            setIsLoading(true);
+            await login(idToken);
+        } catch (error: any) {
+            Alert.alert(
+                "Login Failed",
+                error?.message ||
+                    "Failed to login with Google. Please try again."
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleLoginPress = () => {
+        promptAsync();
+    };
+
+    if (isLoading) {
+        return <Loading message="Signing you in..." />;
     }
-  }, [response]);
 
-  const handleGoogleLogin = async (idToken: string) => {
-    try {
-      setIsLoading(true);
-      await login(idToken);
-    } catch (error: any) {
-      Alert.alert(
-        'Login Failed',
-        error?.message || 'Failed to login with Google. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // DEBUG: Show redirect URI to help user fix configuration
+    console.log("Current Redirect URI:", redirectUri);
 
-  const handleLoginPress = () => {
-    promptAsync();
-  };
+    return (
+        <View
+            style={[styles.container, { backgroundColor: colors.background }]}
+        >
+            <View style={styles.content}>
+                {/* Logo/Icon */}
+                <View
+                    style={[
+                        styles.iconContainer,
+                        { backgroundColor: colors.primary },
+                    ]}
+                >
+                    <Ionicons name="people" size={64} color="#FFFFFF" />
+                </View>
 
-  if (isLoading) {
-    return <Loading message="Signing you in..." />;
-  }
+                {/* Title */}
+                <Text style={[styles.title, { color: colors.text }]}>
+                    Group Expense Manager
+                </Text>
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.content}>
-        {/* Logo/Icon */}
-        <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
-          <Ionicons name="people" size={64} color="#FFFFFF" />
+                {/* Subtitle */}
+                <Text
+                    style={[styles.subtitle, { color: colors.textSecondary }]}
+                >
+                    Manage shared expenses with friends, family, and teams
+                </Text>
+
+                {/* Features */}
+                <View style={styles.features}>
+                    <FeatureItem
+                        icon="people-outline"
+                        text="Create unlimited groups"
+                        colors={colors}
+                    />
+                    <FeatureItem
+                        icon="cash-outline"
+                        text="Track expenses & income"
+                        colors={colors}
+                    />
+                    <FeatureItem
+                        icon="analytics-outline"
+                        text="Monthly summaries"
+                        colors={colors}
+                    />
+                    <FeatureItem
+                        icon="swap-horizontal-outline"
+                        text="Auto-calculate settlements"
+                        colors={colors}
+                    />
+                </View>
+            </View>
+
+            {/* Login Button */}
+            <View style={styles.footer}>
+                <Button
+                    title="Sign in with Google"
+                    onPress={handleLoginPress}
+                    disabled={!request}
+                    fullWidth
+                    size="large"
+                    icon={
+                        <Ionicons
+                            name="logo-google"
+                            size={20}
+                            color="#FFFFFF"
+                            style={{ marginRight: SPACING.sm }}
+                        />
+                    }
+                />
+
+                {/* Dev Bypass Button */}
+                {__DEV__ && (
+                    <Button
+                        title="Dev Bypass Login (Skip Auth)"
+                        onPress={() => handleGoogleLogin("mock-token")}
+                        variant="outline"
+                        fullWidth
+                        style={{ marginTop: 10 }}
+                    />
+                )}
+
+                <Text
+                    style={[styles.disclaimer, { color: colors.textSecondary }]}
+                >
+                    By signing in, you agree to our Terms of Service and Privacy
+                    Policy
+                </Text>
+            </View>
         </View>
-
-        {/* Title */}
-        <Text style={[styles.title, { color: colors.text }]}>
-          Group Expense Manager
-        </Text>
-
-        {/* Subtitle */}
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Manage shared expenses with friends, family, and teams
-        </Text>
-
-        {/* Features */}
-        <View style={styles.features}>
-          <FeatureItem
-            icon="people-outline"
-            text="Create unlimited groups"
-            colors={colors}
-          />
-          <FeatureItem
-            icon="cash-outline"
-            text="Track expenses & income"
-            colors={colors}
-          />
-          <FeatureItem
-            icon="analytics-outline"
-            text="Monthly summaries"
-            colors={colors}
-          />
-          <FeatureItem
-            icon="swap-horizontal-outline"
-            text="Auto-calculate settlements"
-            colors={colors}
-          />
-        </View>
-      </View>
-
-      {/* Login Button */}
-      <View style={styles.footer}>
-        <Button
-          title="Sign in with Google"
-          onPress={handleLoginPress}
-          disabled={!request}
-          fullWidth
-          size="large"
-          icon={<Ionicons name="logo-google" size={20} color="#FFFFFF" style={{ marginRight: SPACING.sm }} />}
-        />
-        <Text style={[styles.disclaimer, { color: colors.textSecondary }]}>
-          By signing in, you agree to our Terms of Service and Privacy Policy
-        </Text>
-      </View>
-    </View>
-  );
+    );
 };
 
 interface FeatureItemProps {

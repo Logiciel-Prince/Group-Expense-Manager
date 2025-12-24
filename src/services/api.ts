@@ -59,6 +59,28 @@ class ApiService {
 
   // Auth endpoints
   async googleLogin(idToken: string): Promise<AuthResponse> {
+    if (require("../constants").USE_MOCK_API) {
+        console.log("Using MOCK API for Login");
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({
+                    success: true,
+                    message: "Login successful",
+                    data: {
+                        token: "mock-jwt-token-12345",
+                        user: {
+                            id: "mock-user-id",
+                            googleId: "mock-google-id",
+                            email: "demo@example.com",
+                            name: "Test User",
+                            avatar: "https://ui-avatars.com/api/?name=Test+User&background=6366F1&color=fff",
+                            createdAt: new Date().toISOString(),
+                        },
+                    },
+                });
+            }, 1000);
+        });
+    }
     return this.client.post('/auth/google', { idToken });
   }
 

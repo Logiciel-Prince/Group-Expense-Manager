@@ -3,14 +3,27 @@ export const API_URL = __DEV__
   ? 'http://10.0.2.2:5000/api' // Android emulator
   : 'https://your-production-api.com/api';
 
-// Google OAuth
-export const GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com';
+// Google OAuth Client IDs
+// TODO: Replace these with your actual Client IDs from Google Cloud Console
+export const GOOGLE_CLIENT_ID = {
+  web: "84161102992-4tsjoqjtkbh1tio43ob0queft4liakmi.apps.googleusercontent.com", // For Expo Go & Web
+  android: "84161102992-lu82fpnllvugb4v6se8tsbponpflvf4u.apps.googleusercontent.com", // Replace with Android Client ID
+  ios: "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com", // Replace with iOS Client ID
+};
+
+export const EXPO_USERNAME = "princedev005";
+
+export const REDIRECT_URI = `https://auth.expo.io/@${EXPO_USERNAME}/group-expense-manager`;
+
+// Feature Flags
+export const USE_MOCK_API = true; // Set to true to bypass backend
 
 // AsyncStorage Keys
 export const STORAGE_KEYS = {
   AUTH_TOKEN: '@auth_token',
   USER_DATA: '@user_data',
   THEME: '@theme',
+  EXPO_USERNAME: '@expo_username',
 };
 
 // Theme Colors
