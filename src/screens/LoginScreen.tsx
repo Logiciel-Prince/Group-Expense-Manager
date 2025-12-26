@@ -46,13 +46,26 @@ export const LoginScreen: React.FC = () => {
     React.useEffect(() => {
         if (response?.type === "success") {
             const { id_token } = response.params;
-            handleGoogleLogin(id_token);
+            if (id_token) {
+                handleGoogleLogin(id_token);
+            } else {
+                console.error("No ID token in response");
+                Alert.alert(
+                    "Authentication Error",
+                    "Failed to get authentication token. Please try again."
+                );
+            }
         } else if (response?.type === "error") {
+            console.error("Auth Error:", response.error);
             Alert.alert(
                 "Authentication Error",
-                "Please check your Google Cloud Console configuration."
+                response.error?.message ||
+                    "Something went wrong during authentication. Please try again."
             );
-            console.error("Auth Error:", response.error);
+        } else if (response?.type === "cancel") {
+            console.log("User cancelled authentication");
+        } else if (response?.type === "dismiss") {
+            console.log("Authentication dismissed");
         }
     }, [response]);
 
@@ -152,17 +165,6 @@ export const LoginScreen: React.FC = () => {
                     }
                 />
 
-                {/* Dev Bypass Button */}
-                {__DEV__ && (
-                    <Button
-                        title="Dev Bypass Login (Skip Auth)"
-                        onPress={() => handleGoogleLogin("mock-token")}
-                        variant="outline"
-                        fullWidth
-                        style={{ marginTop: 10 }}
-                    />
-                )}
-
                 <Text
                     style={[styles.disclaimer, { color: colors.textSecondary }]}
                 >
@@ -175,66 +177,72 @@ export const LoginScreen: React.FC = () => {
 };
 
 interface FeatureItemProps {
-  icon: keyof typeof Ionicons.glyphMap;
-  text: string;
-  colors: any;
+    icon: keyof typeof Ionicons.glyphMap;
+    text: string;
+    colors: any;
 }
 
 const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text, colors }) => (
-  <View style={styles.featureItem}>
-    <Ionicons name={icon} size={24} color={colors.primary} />
-    <Text style={[styles.featureText, { color: colors.text }]}>{text}</Text>
-  </View>
+    <View style={styles.featureItem}>
+        <Ionicons name={icon} size={24} color={colors.primary} />
+        <Text style={[styles.featureText, { color: colors.text }]}>{text}</Text>
+    </View>
 );
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: RADIUS.xl,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-  },
-  title: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: FONT_WEIGHTS.bold,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.md,
-    textAlign: 'center',
-    marginBottom: SPACING.xxl,
-  },
-  features: {
-    width: '100%',
-    marginTop: SPACING.lg,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  featureText: {
-    fontSize: FONT_SIZES.md,
-    marginLeft: SPACING.md,
-  },
-  footer: {
-    padding: SPACING.xl,
-  },
-  disclaimer: {
-    fontSize: FONT_SIZES.xs,
-    textAlign: 'center',
-    marginTop: SPACING.md,
-  },
+    container: {
+        flex: 1,
+    },
+    content: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: SPACING.xl,
+    },
+    iconContainer: {
+        width: 120,
+        height: 120,
+        borderRadius: RADIUS.xl,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: SPACING.xl,
+    },
+    title: {
+        fontSize: FONT_SIZES.xxxl,
+        fontWeight: FONT_WEIGHTS.bold,
+        textAlign: "center",
+        marginBottom: SPACING.sm,
+    },
+    subtitle: {
+        fontSize: FONT_SIZES.md,
+        textAlign: "center",
+        marginBottom: SPACING.xxl,
+    },
+    features: {
+        width: "100%",
+        marginTop: SPACING.lg,
+    },
+    featureItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: SPACING.md,
+    },
+    featureText: {
+        fontSize: FONT_SIZES.md,
+        marginLeft: SPACING.md,
+    },
+    footer: {
+        padding: SPACING.xl,
+    },
+    devNote: {
+        fontSize: FONT_SIZES.sm,
+        textAlign: "center",
+        marginTop: SPACING.sm,
+        fontWeight: FONT_WEIGHTS.medium,
+    },
+    disclaimer: {
+        fontSize: FONT_SIZES.xs,
+        textAlign: "center",
+        marginTop: SPACING.md,
+    },
 });
