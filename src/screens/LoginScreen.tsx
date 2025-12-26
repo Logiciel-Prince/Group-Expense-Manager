@@ -24,48 +24,88 @@ export const LoginScreen: React.FC = () => {
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
+    // Use Expo's auth redirect URI (required for Google OAuth with Web Client ID)
     const redirectUri = REDIRECT_URI;
 
     // Log the expected URI for debugging
-    console.log("Expected Redirect URI:", redirectUri);
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("🔍 GOOGLE OAUTH DEBUG INFO:");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("Redirect URI:", redirectUri);
+    console.log("Google Client ID:", GOOGLE_CLIENT_ID.web);
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("⚠️  ADD THIS EXACT URI TO GOOGLE CLOUD CONSOLE:");
+    console.log(redirectUri);
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         clientId: GOOGLE_CLIENT_ID.web,
-        // We strictly use the Web Client ID for all platforms here to force the
-        // Redirect URI flow (https://auth.expo.io/...).
-        // Native Client IDs (android/ios) do NOT satisfy the Redirect URI requirement.
         redirectUri: redirectUri,
     });
 
     React.useEffect(() => {
         if (request) {
-            console.log("Request Redirect URI:", request.redirectUri);
+            console.log("✅ Request created successfully");
+            console.log(
+                "📍 Actual Redirect URI being used:",
+                request.redirectUri
+            );
+            if (request.redirectUri !== redirectUri) {
+                console.warn("⚠️  WARNING: Redirect URI mismatch!");
+                console.warn("Expected:", redirectUri);
+                console.warn("Actual:", request.redirectUri);
+            }
         }
     }, [request]);
 
     React.useEffect(() => {
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log("📥 AUTH RESPONSE:", response?.type || "No response yet");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
         if (response?.type === "success") {
+            console.log("✅ SUCCESS! Got response from Google");
+            console.log(
+                "Response params:",
+                JSON.stringify(response.params, null, 2)
+            );
+
             const { id_token } = response.params;
             if (id_token) {
+                console.log("✅ ID Token received, logging in...");
                 handleGoogleLogin(id_token);
             } else {
-                console.error("No ID token in response");
+                console.error("❌ No ID token in response");
+                console.error(
+                    "Full response:",
+                    JSON.stringify(response, null, 2)
+                );
                 Alert.alert(
                     "Authentication Error",
                     "Failed to get authentication token. Please try again."
                 );
             }
         } else if (response?.type === "error") {
-            console.error("Auth Error:", response.error);
+            console.error("❌ AUTH ERROR");
+            console.error(
+                "Error details:",
+                JSON.stringify(response.error, null, 2)
+            );
             Alert.alert(
                 "Authentication Error",
                 response.error?.message ||
                     "Something went wrong during authentication. Please try again."
             );
         } else if (response?.type === "cancel") {
-            console.log("User cancelled authentication");
+            console.log("⚠️  User cancelled authentication");
         } else if (response?.type === "dismiss") {
-            console.log("Authentication dismissed");
+            console.log("⚠️  Authentication dismissed");
+            console.log(
+                "This usually means the browser was closed before completing auth"
+            );
+        } else if (response) {
+            console.warn("⚠️  Unknown response type:", response.type);
+            console.warn("Full response:", JSON.stringify(response, null, 2));
         }
     }, [response]);
 

@@ -62,11 +62,11 @@ class ApiService {
 
     // Auth endpoints
     async googleLogin(idToken: string): Promise<AuthResponse> {
-        return this.client.post("/auth/google", { idToken });
+        return this.client.post("/api/auth/google", { idToken });
     }
 
     async getCurrentUser(): Promise<ApiResponse<{ user: User }>> {
-        return this.client.get("/auth/me");
+        return this.client.get("/api/auth/me");
     }
 
     async logout(): Promise<ApiResponse<null>> {
@@ -82,7 +82,7 @@ class ApiService {
                 }, 500);
             });
         }
-        return this.client.post("/auth/logout");
+        return this.client.post("/api/auth/logout");
     }
 
     // User endpoints

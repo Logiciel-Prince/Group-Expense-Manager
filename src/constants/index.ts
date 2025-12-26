@@ -1,7 +1,7 @@
 // API Base URL
 export const API_URL = __DEV__
-    ? "http://localhost:5000" // Android emulator
-    : "https://your-production-api.com/api";
+    ? "http://10.0.2.2:5000" // Android emulator (10.0.2.2 = your computer's localhost)
+    : "https://your-production-api.com";
 
 // Google OAuth Client IDs
 // TODO: Replace these with your actual Client IDs from Google Cloud Console
