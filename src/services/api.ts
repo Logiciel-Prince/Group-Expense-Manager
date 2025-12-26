@@ -89,6 +89,18 @@ class ApiService {
   }
 
   async logout(): Promise<ApiResponse<null>> {
+    if (require("../constants").USE_MOCK_API) {
+        console.log("Using MOCK API for Logout");
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({
+                    success: true,
+                    message: "Logout successful",
+                    data: null,
+                });
+            }, 500);
+        });
+    }
     return this.client.post('/auth/logout');
   }
 

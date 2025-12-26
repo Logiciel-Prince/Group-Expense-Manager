@@ -60,28 +60,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = async () => {
-    try {
-      await api.logout();
-    } catch (error) {
-      console.error('Logout API error:', error);
-    } finally {
-      await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      await AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      try {
+          // Try to call the logout API endpoint
+          await api.logout();
+      } catch (error) {
+          console.error("Logout API error:", error);
+          // Continue with logout even if API call fails
+      }
+
+      // Always clear local storage and state
+      try {
+          await AsyncStorage.multiRemove([
+              STORAGE_KEYS.AUTH_TOKEN,
+              STORAGE_KEYS.USER_DATA,
+          ]);
+      } catch (error) {
+          console.error("Error clearing storage:", error);
+      }
+
+      // Reset state
       setToken(null);
       setUser(null);
       api.setAuthToken(null);
-    }
+
+      console.log("User logged out successfully");
   };
 
   const refreshUser = async () => {
-    try {
-      const response = await api.getCurrentUser();
-      const userData = response.data.user;
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
-      setUser(userData);
-    } catch (error) {
-      console.error('Error refreshing user:', error);
-    }
+      try {
+          const response = await api.getCurrentUser();
+          if (response.data?.user) {
+              const userData = response.data.user;
+              await AsyncStorage.setItem(
+                  STORAGE_KEYS.USER_DATA,
+                  JSON.stringify(userData)
+              );
+              setUser(userData);
+          }
+      } catch (error) {
+          console.error("Error refreshing user:", error);
+      }
   };
 
   return (
